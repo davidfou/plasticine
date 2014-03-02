@@ -1,7 +1,7 @@
 {
   "name": "plasticine",
   "version": "0.0.0",
-  "main": 'dist/plasticine.js",
+  "main": "dist/plasticine.js",
   "dependencies": {
     "almond": "0.2.9",
     "crossroads.js": "0.12.0",
