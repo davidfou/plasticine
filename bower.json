@@ -1,13 +1,17 @@
 {
   "name": "plasticine",
+  "version": "0.0.0",
+  "main": 'dist/plasticine.js",
   "dependencies": {
-    "requirejs": "~2.1.5",
-    "crossroads.js": "~0.12.0",
-    "lodash-amd":"~2.1.0"
+    "almond": "0.2.9",
+    "crossroads.js": "0.12.0",
+    "lodash-amd":"2.1.0"
   },
   "devDependencies": {
-    "mocha": "~1.12.1",
-    "sinon-chai": "~2.4.0",
-    "chai":"~1.8.1"
+    "requirejs": "2.1.5",
+    "mocha": "1.17.1",
+    "sinon-chai": "2.4.0",
+    "chai":"1.8.1",
+    "jquery":"2.1.0"
   }
 }

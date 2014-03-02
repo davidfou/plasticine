@@ -1,50 +1,140 @@
 "use strict"
-module.exports = uRequireConfigMasterDefaults = (grunt) ->
+module.exports = (grunt) ->
 
   # Project configuration.
   grunt.initConfig
 
     # Metadata.
     pkg: grunt.file.readJSON("package.json")
-    banner: "/*! <%= pkg.name %> - v<%= pkg.version %> - " + "<%= grunt.template.today(\"yyyy-mm-dd\") %>\n" + "<%= pkg.homepage ? \"* \" + pkg.homepage + \"\\n\" : \"\" %>" + "* Copyright (c) <%= grunt.template.today(\"yyyy\") %> <%= pkg.author.name %>;" + " Licensed <%= _.pluck(pkg.licenses, \"type\").join(\", \") %> */\n"
+
+    dir:
+      source : 'source/'
+      bower  : 'components/'
+      tmp    : '.tmp/'
+
 
     # Task configuration.
     clean:
-      files: ["dist", ".tmp"]
+      files: ["dist", "<%= dir.tmp %>"]
 
     copy:
       source:
         files: [
           expand: true
-          cwd: 'source/'
+          cwd: "<%= dir.source %>"
           src: ['**', '!**/*.coffee']
-          dest: '.tmp'
+          dest: "<%= dir.tmp %>"
         ]
       components:
         files: [
           expand: true
-          cwd: 'components/'
+          cwd: "<%= dir.bower %>"
           src: ['**']
-          dest: '.tmp/components'
+          dest: "<%= dir.tmp %><%= dir.bower %>"
         ]
       sinon:
         files: [
           expand: true
           cwd: 'node_modules/sinon'
           src: ['**']
-          dest: '.tmp/components/sinon'
+          dest: "<%= dir.tmp %><%= dir.bower %>sinon"
         ]
 
 
     coffee:
       compile:
         options:
-          bare : true
+          bare      : true
+          sourceMap : false
         expand : true
-        cwd    : 'source/'
+        cwd    : "<%= dir.source %>"
         src    : ['**/*.coffee']
-        dest   : '.tmp'
+        dest   : "<%= dir.tmp %>"
         ext    : '.js'
+
+    amdwrap:
+      compile:
+        expand : true
+        cwd    : "<%= dir.tmp %>"
+        src    : ['app/**/*.js']
+        dest   : "<%= dir.tmp %>"
+      initCustomSinon:
+        expand : true
+        cwd    : "<%= dir.tmp %><%= dir.bower %>"
+        src    : "custom_sinon.js"
+        dest   : "<%= dir.tmp %><%= dir.bower %>"
+
+
+    wrap:
+      test:
+        expand: true
+        cwd: "<%= dir.tmp %>test/spec"
+        src: ["**"]
+        dest: "<%= dir.tmp %>test/spec"
+        options:
+          wrapper: [
+            "define(function() { return function() { var out ="
+            "return out;};});"]
+      dist:
+        expand: true
+        cwd: "dist/"
+        src: ["**"]
+        dest: "dist/"
+        options:
+          wrapper: [
+            """
+            (function (root, factory) {
+              if (typeof define === 'function' && define.amd) {
+                // AMD. Register as an anonymous module.
+                define(['b'], factory);
+              } else {
+                // Browser globals
+                root.Plasticine = factory(root.b);
+              }
+            }(this, function (b) {
+            """
+            """
+              return require('plasticine');
+            }));
+            """]
+
+    process:
+      testInit:
+        options:
+          base64: false
+          processors: [
+            pattern: '// main_node_var_here'
+            setup: (grunt) ->
+              fs = require 'fs'
+              getFiles = (dir) ->
+
+                node =
+                  name: dir.split('/').pop()
+                  files: []
+                  directories: []
+                files = fs.readdirSync(dir)
+                for file in files
+                  name = dir + '/' + file
+                  if fs.statSync(name).isDirectory()
+                    node.directories.push getFiles(name)
+                  else
+                    if (/\.coffee$/).test(file)
+                      node.files.push file.replace /\.coffee$/, ''
+                return node
+
+              main_node = getFiles("#{grunt.config.get('dir.source')}test/spec")
+              return main_node: main_node
+
+            handler: (context) ->
+              return JSON.stringify context.main_node
+          ]
+        files: [
+          expand: true
+          cwd: "<%= dir.tmp %>test/"
+          src: "config.js"
+          dest: "<%= dir.tmp %>test/"
+        ]
+
 
     concat:
       initCustomSinon:
@@ -55,113 +145,141 @@ module.exports = uRequireConfigMasterDefaults = (grunt) ->
           'node_modules/sinon/lib/sinon/util/fake_xml_http_request.js'
           'vendor/sinon/sinon_end.js'
         ]
-        dest : '.tmp/components/custom_sinon.js'
+        dest : "<%= dir.tmp %><%= dir.bower %>custom_sinon.js"
 
     mocha:
-      all: ['.tmp/test/index.html']
+      all: ["<%= dir.tmp %>test/index.html"]
       options:
-        reporter : 'Spec'
+        reporter : 'Progress'
         run      : false
-
-    jshint:
-      app:
-        options:
-          jshintrc: "source/app/.jshintrc"
-
-        src: [".tmp/app/**/*.js"]
-
-      test:
-        options:
-          jshintrc: "source/test/.jshintrc"
-
-        src: [".tmp/test/**/*.js"]
+        log: true
+        logErrors: true
 
     watch:
-      test:
-        files: "source/**"
-        tasks: "runTest"
+      options:
+        livereload: true
+        spawn: false
+        cwd  : "<%= dir.source %>"
+      coffeeFileModified:
+        files: "**/*.coffee"
+        tasks: ["coffee", "amdwrap:compile", "wrap:test", "process", "mocha"]
         options:
-          livereload: true
+          event: ['added', 'changed']
+      coffeeFileDeleted:
+        files: "**/*.coffee"
+        tasks: ["clean", "coffee", "process", "mocha"]
+        options:
+          event: ['deleted']
 
     requirejs:
       compile:
         options:
-          baseUrl: ".tmp/app"
+          mainConfigFile: "<%= dir.tmp %>app/main.js"
           out: "dist/plasticine.js"
           optimize: 'none'
           cjsTranslate: true
           paths:
-            requireLib: '../components/requirejs/require'
+            requireLib: '../components/almond/almond'
           include: ['requireLib']
 
-    'amd-dist':
-      all:
+    usebanner:
+      dist:
         options:
-          standalone: false
-          env: 'browser'
-          exports: 'plasticine'
-        files: [
-          {
-            src:  'dist/plasticine.js'
-            dest: 'dist/plasticine-global.js'
-          }
-        ]
+          position: 'top'
+          linebreak: true
+          banner:
+            """
+            /*!
+             * plasticine JavaScript Library v0.0.0
+             * https://github.com/dfournier/plasticine
+             *
+             * Copyright 2014 David Fournier <fr.david.fournier@gmail.com>
+             * Released under the MIT license
+             * https://github.com/dfournier/plasticine/blob/master/LICENSE-MIT
+             *
+             * Date: <%= grunt.template.today() %>
+             */
+             """
+        files:
+          src: "dist/plasticine.js"
 
-    amdwrap:
-      sinon:
-        expand: true,
-        cwd: "lib/",
-        src: ["*.js"],
-        dest: "artifacts/amd/"
+    "git-describe":
+      dist: {}
 
     connect:
       development:
         options:
-          base: '.tmp'
-
-    open:
-      development:
-        path: 'http://localhost:<%= connect.development.options.port%>/test'
-
-    notify:
-      specFailed:
-        options:
-          message: "Spec failed!"
-      specPassed:
-        options:
-          message: "Spec passed!"
-
-    notify_hooks:
-      options:
-        enabled: false
+          open: 'http://0.0.0.0:8000/test'
+          base: ["./", "<%= dir.tmp %>"]
 
 
-  # These plugins provide necessary tasks.
   grunt.loadNpmTasks "grunt-contrib-clean"
   grunt.loadNpmTasks "grunt-mocha"
-  grunt.loadNpmTasks "grunt-contrib-jshint"
   grunt.loadNpmTasks "grunt-contrib-watch"
   grunt.loadNpmTasks "grunt-contrib-connect"
   grunt.loadNpmTasks "grunt-contrib-copy"
   grunt.loadNpmTasks "grunt-contrib-coffee"
+  grunt.loadNpmTasks "grunt-amd-wrap"
+  grunt.loadNpmTasks "grunt-renaming-wrap"
+  grunt.loadNpmTasks 'grunt-file-process'
   grunt.loadNpmTasks "grunt-contrib-concat"
   grunt.loadNpmTasks "grunt-contrib-requirejs"
-  grunt.loadNpmTasks "grunt-amd-dist"
-  grunt.loadNpmTasks "grunt-notify"
-  grunt.loadNpmTasks "grunt-open"
-  grunt.loadNpmTasks "grunt-amd-wrap"
+  grunt.loadNpmTasks "grunt-git-describe"
+  grunt.loadNpmTasks "grunt-banner"
 
-  grunt.task.run('notify_hooks');
+  grunt.event.on 'watch', (action, filepath, target) ->
+    coffee_files = []
+    process_files_conf = grunt.config.get("process.testInit.files")
+    process_files_conf[0].src = ''
+    compile_config = ->
+      coffee_files.push 'test/config.coffee'
+      process_files_conf[0].src = 'config.js'
 
-  # Default task.
-  grunt.registerTask "default", ["clean", "build", "jshint", "mocha"]
-  grunt.registerTask "compile", ["clean", "coffee", "copy", "concat"]
-  grunt.registerTask "build", ["compile", "requirejs"]
+    coffee_task = 'coffee.compile'
+    root_path = grunt.config.get("#{coffee_task}.cwd")
+    relative_path = filepath.replace(new RegExp("^#{root_path}"), '')
+    ext = grunt.config.get("#{coffee_task}.ext")
+    relative_compiled_path = relative_path.replace(/.coffee$/, ext)
+    compiled_file = grunt.config.get('dir.tmp') + relative_compiled_path
 
-  # Use those tasks when developping and get test in result in the terminal, as
-  # a notification or in a browser
-  grunt.registerTask "devTerminal", ["compile", "watch:test"]
-  grunt.registerTask "devBrowser", ["connect:development", "open:development", "devTerminal"]
+    if target is 'coffeeFileModified'
+      coffee_files.push relative_path
+      # amdwrap task is only for files in app/ folder
+      # wrap task is only for files in test/spec folder
+      if (/^test/g).test relative_path
+        grunt.config("amdwrap.compile.src", [])
+        if (/^test\/spec/g).test relative_path
+          src = relative_compiled_path.replace /^test\/spec\//, ''
+          grunt.config("wrap.test.src", src)
+        else
+          grunt.config("wrap.test.src", [])
+      else
+        grunt.config("amdwrap.compile.src", relative_compiled_path)
+        grunt.config("wrap.test.src", [])
+
+      # recompile test/config.coffee if a new file is added in test/spec folder
+      if action is 'added' and (/^test\/spec\//).test relative_path
+        compile_config()
+
+    if target is 'coffeeFileDeleted'
+      grunt.config('clean.files', compiled_file)
+      compile_config() if (/^test\/spec\//).test relative_path
+
+    grunt.config("#{coffee_task}.src", coffee_files)
+    grunt.config("process.testInit.files", process_files_conf)
 
 
-  grunt.registerTask "runTest", ["compile", "mocha"]
+  grunt.registerTask 'setRevision', ->
+    grunt.event.once 'git-describe', -> grunt.option('gitRevision', rev)
+    grunt.task.run('git-describe')
+
+  grunt.registerTask "initCustomSinon", ["concat:initCustomSinon"]
+
+  grunt.registerTask "default", ["clean", "build", "mocha"]
+  grunt.registerTask "compile", ["clean", "coffee", "copy", "initCustomSinon"]
+  grunt.registerTask "build", ["compile", "requirejs", "wrap:dist", "usebanner"]
+
+  grunt.registerTask "start", ["compile", "amdwrap:compile", "wrap:test", "process", "watch"]
+  grunt.registerTask "start:browser", ["connect:development", "start"]
+
+  grunt.registerTask "test", ["compile", "amdwrap:compile", "mocha"]

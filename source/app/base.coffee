@@ -1,55 +1,48 @@
-files = [
-  "crossroads"
-  "lodash/functions/defer"
-  "lodash/functions/delay"
-]
+crossroads = require "crossroads"
+clone      = require "lodash/objects/clone"
 
-define files, ->
-  class MockBase
+module.exports = class MockBase
 
-    crossroads = require "crossroads"
-    defer      = require "lodash/functions/defer"
-    delay      = require "lodash/functions/delay"
+  @instanceCounts: 0
+  @header:
+    'X-Azendoo-Assets': 'none'
 
-    @instanceCounts: 0
-    @header:
-      'X-Azendoo-Assets': 'none'
-
-    constructor: ->
-      @createdRoutes = []
-      @disposed = false
+  constructor: ->
+    @createdRoutes = []
+    @disposed = false
 
 
-    setUp: ->
-      supported_method = ['get', 'put', 'post', 'delete']
-      @createRoute(method) for method in supported_method when @[method]?
+  setUp: ->
+    supported_method = ['get', 'put', 'post', 'delete']
+    @createRoute(method) for method in supported_method when @[method]?
 
 
-    createRoute: (method) ->
-      @createdRoutes.push = crossroads.addRoute "/#{method.toUpperCase()}#{@route}", (xhr) =>
-        xhr.filtered = false
+  createRoute: (method) ->
+    route = "/#{method.toUpperCase()}#{@route}"
+    @createdRoutes.push crossroads.addRoute route, (xhr, route_params) =>
+      xhr.filtered    = false
+      xhr.responseSet = false
 
-        # TODO: should listend to onchangestate insteadof using a defer
-        last_arguments = _.rest(arguments)
-        defered_function = =>
-          new_arguments = []
+      respond_callback = (e) =>
+        return unless xhr.request.readyState is 1 and xhr.request.sendFlag and not xhr.responseSet
+        xhr.responseSet = true
 
-          if method in ['post', 'put']
-            new_arguments.push _.clone JSON.parse(xhr.request.requestBody)
-          new_arguments.push arg for arg in last_arguments
+        new_arguments = [route_params]
+        if method in ['post', 'put']
+          new_arguments.push JSON.parse(xhr.request.requestBody)
 
-          fakeReturn = @[method].apply(@, new_arguments)
+        fakeReturn = @[method].apply(@, new_arguments)
 
-          delay (-> xhr.request.respond(
-              fakeReturn.status
-              MockBase.header
-              JSON.stringify(fakeReturn.body))), 400
+        xhr.request.respond(
+          fakeReturn.status
+          MockBase.header
+          JSON.stringify(fakeReturn.body))
 
-        defer defered_function
+      xhr.request.addEventListener "readystatechange", respond_callback, false
 
 
-    dispose: ->
-      return if @disposed
-      @disposed = true
-      while route.length isnt 0
-        crossroads.removeRoute @createdRoutes.pop()
+  dispose: ->
+    return if @disposed
+    @disposed = true
+    while @createdRoutes.length isnt 0
+      crossroads.removeRoute @createdRoutes.pop()
