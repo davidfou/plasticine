@@ -6,7 +6,7 @@
  * Released under the MIT license
  * https://github.com/dfournier/plasticine/blob/master/LICENSE-MIT
  *
- * Date: Sun Mar 02 2014 23:58:20
+ * Date: Thu Mar 06 2014 00:00:32
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -3827,9 +3827,7 @@ clone = require("lodash/objects/clone");
 module.exports = MockBase = (function() {
   MockBase.instanceCounts = 0;
 
-  MockBase.header = {
-    'X-Azendoo-Assets': 'none'
-  };
+  MockBase.header = {};
 
   function MockBase() {
     this.createdRoutes = [];
