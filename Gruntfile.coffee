@@ -15,7 +15,8 @@ module.exports = (grunt) ->
 
     # Task configuration.
     clean:
-      files: ["dist", "<%= dir.tmp %>"]
+      tmp  : ["<%= dir.tmp %>"]
+      dist : ["dist"]
 
     copy:
       source:
@@ -167,7 +168,7 @@ module.exports = (grunt) ->
           event: ['added', 'changed']
       coffeeFileDeleted:
         files: "**/*.coffee"
-        tasks: ["clean", "coffee", "process", "mocha"]
+        tasks: ["clean:tmp", "coffee", "process", "mocha"]
         options:
           event: ['deleted']
 
@@ -262,7 +263,7 @@ module.exports = (grunt) ->
         compile_config()
 
     if target is 'coffeeFileDeleted'
-      grunt.config('clean.files', compiled_file)
+      grunt.config('clean.tmp', compiled_file)
       compile_config() if (/^test\/spec\//).test relative_path
 
     grunt.config("#{coffee_task}.src", coffee_files)
@@ -274,12 +275,13 @@ module.exports = (grunt) ->
     grunt.task.run('git-describe')
 
   grunt.registerTask "initCustomSinon", ["concat:initCustomSinon"]
+  grunt.registerTask "compileTest", ["amdwrap:compile", "wrap:test", "process"]
 
-  grunt.registerTask "default", ["clean", "build", "mocha"]
-  grunt.registerTask "compile", ["clean", "coffee", "copy", "initCustomSinon"]
-  grunt.registerTask "build", ["compile", "requirejs", "wrap:dist", "usebanner"]
+  grunt.registerTask "default", ["test"]
+  grunt.registerTask "compile", ["clean:tmp", "coffee", "copy", "initCustomSinon"]
+  grunt.registerTask "build", ["clean:dist", "compile", "requirejs", "wrap:dist", "usebanner"]
 
-  grunt.registerTask "start", ["compile", "amdwrap:compile", "wrap:test", "process", "watch"]
+  grunt.registerTask "start", ["compile", "compileTest", "watch"]
   grunt.registerTask "start:browser", ["connect:development", "start"]
 
-  grunt.registerTask "test", ["compile", "amdwrap:compile", "mocha"]
+  grunt.registerTask "test", ["compile", "compileTest", "mocha"]

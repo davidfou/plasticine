@@ -4,8 +4,7 @@ clone      = require "lodash/objects/clone"
 module.exports = class MockBase
 
   @instanceCounts: 0
-  @header:
-    'X-Azendoo-Assets': 'none'
+  @header: {}
 
   constructor: ->
     @createdRoutes = []

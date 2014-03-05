@@ -18,7 +18,7 @@ Here an example to play with Plasticine:
         return {status: 200, body: {message: 'Hello world!'}};
       }
     });
-    
+
 With this sample, any request GET on route info.json is faked (no request is send). The response of the request is defined by the `get` callback.
 
 ### `Plasticine.addMock(params):Mock`
@@ -27,26 +27,28 @@ With this sample, any request GET on route info.json is faked (no request is sen
 
 * `route`: define the request route to catch. It can have parameters, syntax define by [crossroads.js](http://millermedeiros.github.io/crossroads.js/#crossroads-add_route). This parameter is mandatory.
 * `get`: callback to determine a GET request. Callback get route variables as parameters:
-* 
-      Plasticine.addMock({
-        route: '/messages/{id}.json',
-        get: function(route_params) {
-          if (route_params.id === '1')
-            return {status: 200, body: {message: 'Hello world!'}};
-          else
-            return {status: 404, body: {error: 'unknown message'}};
-        }
-      });
+
+        Plasticine.addMock({
+          route: '/messages/{id}.json',
+          get: function(route_params) {
+            if (route_params.id === '1')
+              return {status: 200, body: {message: 'Hello world!'}};
+            else
+              return {status: 404, body: {error: 'unknown message'}};
+          }
+        });
+
 * `delete`: same as `get` but on a DELETE request.
 * `post`: same as `get` but on a POST request and callback second parameter has request payload:
-* 
-      Plasticine.addMock({
-        route: '/messages/{id}.json',
-        post: function(route_params, data) {
-          data.id = Math.round(Math.random()*1000000000)
-          return {status: 200, body: data};
-        }
-      });
+
+        Plasticine.addMock({
+          route: '/messages/{id}.json',
+          post: function(route_params, data) {
+            data.id = Math.round(Math.random()*1000000000)
+            return {status: 200, body: data};
+          }
+        });
+
 * `put`: same as `post` but on a PUT request.
 
 ### `Mock.dispose()`
@@ -63,7 +65,7 @@ All dependencies are include in the library:
   * [Lodash](http://lodash.com/): AMD utilities
   * [Sinon.js](http://sinonjs.org/): to intercept requests and to test the library
 * Development dependencies
-  * [Chai](http://chaijs.com/): assertion library 
+  * [Chai](http://chaijs.com/): assertion library
   * [jQuery](http://jquery.com/): to send requests
   * [Mocha](http://visionmedia.github.io/mocha/): test framework
   * [Sinon.js](http://sinonjs.org/): to create fake server
