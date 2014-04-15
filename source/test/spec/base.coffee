@@ -59,12 +59,14 @@ describe 'Mock behavior', ->
     delete_callback_stub = sinon.stub()
     post_callback_stub   = sinon.stub()
     put_callback_stub    = sinon.stub()
+    patch_callback_stub    = sinon.stub()
 
     before ->
       get_callback_stub.returns status: 200, body: {}
       delete_callback_stub.returns status: 200, body: {}
       post_callback_stub.returns status: 200, body: {}
       put_callback_stub.returns status: 200, body: {}
+      patch_callback_stub.returns status: 200, body: {}
 
       mock = @plasticine.addMock
         route  : '/info.json'
@@ -72,6 +74,7 @@ describe 'Mock behavior', ->
         delete : delete_callback_stub
         post   : post_callback_stub
         put    : put_callback_stub
+        patch  : put_callback_stub
 
     after ->
       mock.dispose()
@@ -107,6 +110,17 @@ describe 'Mock behavior', ->
       data = {message: 'Hello', author: 'world'}
       $.ajax
         type : 'PUT'
+        url  : '/info.json'
+        data : JSON.stringify(data)
+      .always ->
+        put_callback_stub.getCall(0).args.should.have.length 2
+        post_callback_stub.getCall(0).args[1].should.be.eql data
+        done()
+
+    it 'should give request data as argument on a PATCH', (done) ->
+      data = {message: 'Hello', author: 'world'}
+      $.ajax
+        type : 'PATCH'
         url  : '/info.json'
         data : JSON.stringify(data)
       .always ->
