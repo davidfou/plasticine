@@ -30,7 +30,7 @@ initialize()
 
 Plasticine.addMock = (params = {}) ->
   model = new MockBase()
-  model[key] = params[key] for key in ['route', 'get', 'put', 'post', 'delete']
+  model[key] = params[key] for key in ['route', 'get', 'put', 'post', 'patch', 'delete']
   model.setUp()
 
   return model
