@@ -50,6 +50,7 @@ With this sample, any request GET on route info.json is faked (no request is sen
         });
 
 * `put`: same as `post` but on a PUT request.
+* `patch`: same as `post` but on a PATCH request.
 
 ### `Mock.dispose()`
 
