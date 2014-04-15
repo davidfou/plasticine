@@ -12,7 +12,7 @@ module.exports = class MockBase
 
 
   setUp: ->
-    supported_method = ['get', 'put', 'post', 'delete']
+    supported_method = ['get', 'put', 'post', 'delete', 'patch']
     @createRoute(method) for method in supported_method when @[method]?
 
 
@@ -27,7 +27,7 @@ module.exports = class MockBase
         xhr.responseSet = true
 
         new_arguments = [route_params]
-        if method in ['post', 'put']
+        if method in ['post', 'put', 'patch']
           new_arguments.push JSON.parse(xhr.request.requestBody)
 
         fakeReturn = @[method].apply(@, new_arguments)
