@@ -182,7 +182,7 @@ module.exports = (grunt) ->
           banner:
             """
             /*!
-             * plasticine JavaScript Library v0.0.0
+             * plasticine JavaScript Library <%= pkg.version %>
              * https://github.com/dfournier/plasticine
              *
              * Copyright 2014 David Fournier <fr.david.fournier@gmail.com>
@@ -216,7 +216,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-file-process'
   grunt.loadNpmTasks "grunt-contrib-concat"
   grunt.loadNpmTasks "grunt-contrib-requirejs"
-  grunt.loadNpmTasks "grunt-git-describe"
   grunt.loadNpmTasks "grunt-banner"
 
   grunt.event.on 'watch', (action, filepath, target) ->
@@ -249,10 +248,6 @@ module.exports = (grunt) ->
     grunt.config("#{coffee_task}.src", coffee_files)
     grunt.config("process.testInit.files", process_files_conf)
 
-
-  grunt.registerTask 'setRevision', ->
-    grunt.event.once 'git-describe', -> grunt.option('gitRevision', rev)
-    grunt.task.run('git-describe')
 
   grunt.registerTask "initCustomSinon", ["concat:initCustomSinon"]
   grunt.registerTask "compileTest", ["amdwrap:compile", "process"]
