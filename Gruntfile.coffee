@@ -111,7 +111,7 @@ module.exports = (grunt) ->
                     node.directories.push getFiles(name)
                   else
                     if (/\.coffee$/).test(file)
-                      node.files.push file.replace /\.coffee$/, ''
+                      node.files.push file.replace /\.coffee$/, '.js'
                 return node
 
               main_node = getFiles("#{grunt.config.get('dir.source')}test/spec")
@@ -170,6 +170,7 @@ module.exports = (grunt) ->
           out: "dist/plasticine.js"
           optimize: 'none'
           cjsTranslate: true
+          baseUrl: '<%= dir.tmp %>app'
           paths:
             requireLib: '../components/almond/almond'
           include: ['requireLib']
