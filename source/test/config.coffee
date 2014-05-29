@@ -40,14 +40,14 @@ specs = get_files '', main_node
 capitalize = (s) ->
   s.charAt(0).toUpperCase() + s[1...]
 
-get_requires = (path, node, is_base = false) -> ->
+get_requires = (path, node, is_base = false) ->
   new_path = path + node.name + '/'
   name = if is_base then "" else capitalize node.name
   describe name, ->
     for file in node.files
       require(new_path + file)()
     for directory in node.directories
-      get_requires(new_path, directory)()
+      get_requires(new_path, directory)
 
 
 require files, ->
@@ -79,6 +79,6 @@ require files, ->
       beforeEach ->
         @requests = []
 
-      get_requires('', main_node, true)()
+      get_requires('', main_node, true)
 
     mocha.run()
