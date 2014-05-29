@@ -35,7 +35,6 @@
     "grunt-file-process"      : "0.2.2",
     "grunt-amd-wrap"          : "1.0.1",
     "sinon"                   : "1.7.3",
-    "grunt-git-describe"      : "2.3.2",
     "grunt-banner"            : "0.2.1"
   }
 }

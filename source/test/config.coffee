@@ -1,19 +1,20 @@
 require.config
+  baseUrl: '/app'
   packages: [
     {
       name: 'lodash'
-      location: '../components/lodash-amd/modern'
+      location: '/components/lodash-amd/modern'
     }
   ]
   paths:
-    'chai'         : '../components/chai/chai'
-    'sinon-chai'   : '../components/sinon-chai/lib/sinon-chai'
-    'sinon'        : '../components/sinon/pkg/sinon-1.7.3'
-    'jquery'       : '../components/jquery/dist/jquery'
-    'plasticine'   : '../app/plasticine'
-    'crossroads'   : '../components/crossroads.js/dist/crossroads'
-    'signals'      : '../components/crossroads.js/dev/lib/signals'
-    'custom-sinon' : '../components/custom_sinon'
+    'chai'         : '/components/chai/chai'
+    'sinon-chai'   : '/components/sinon-chai/lib/sinon-chai'
+    'sinon'        : '/components/sinon/pkg/sinon-1.7.3'
+    'jquery'       : '/components/jquery/dist/jquery'
+    'plasticine'   : '/app/plasticine'
+    'crossroads'   : '/components/crossroads.js/dist/crossroads'
+    'signals'      : '/components/crossroads.js/dev/lib/signals'
+    'custom-sinon' : '/components/custom_sinon'
   shim:
     'sinon':
       exports: "sinon"
@@ -35,19 +36,19 @@ get_files = (path, node) ->
   for directory in node.directories
     out = out.concat get_files(new_path, directory)
   return out
-specs = get_files '', main_node
+files = files.concat get_files '/test/', main_node
 
 capitalize = (s) ->
   s.charAt(0).toUpperCase() + s[1...]
 
-get_requires = (path, node, is_base = false) -> ->
+get_requires = (path, node, is_base = false) ->
   new_path = path + node.name + '/'
   name = if is_base then "" else capitalize node.name
   describe name, ->
     for file in node.files
       require(new_path + file)()
     for directory in node.directories
-      get_requires(new_path, directory)()
+      get_requires(new_path, directory)
 
 
 require files, ->
@@ -60,7 +61,7 @@ require files, ->
   mocha.setup
     globals: ['should', 'sinon']
 
-  require specs, ->
+  require [], ->
     describe '', ->
       before (done) ->
         xhr = sinon.useFakeXMLHttpRequest()
@@ -79,6 +80,6 @@ require files, ->
       beforeEach ->
         @requests = []
 
-      get_requires('', main_node, true)()
+      get_requires('/test/', main_node, true)
 
     mocha.run()

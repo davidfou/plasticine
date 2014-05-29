@@ -1,4 +1,4 @@
-describe 'Mock behavior', ->
+module.exports = -> describe 'Mock behavior', ->
 
   mock_callback   = null
   done_callback   = null

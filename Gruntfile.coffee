@@ -57,7 +57,7 @@ module.exports = (grunt) ->
       compile:
         expand : true
         cwd    : "<%= dir.tmp %>"
-        src    : ['app/**/*.js']
+        src    : ['app/**/*.js', 'test/spec/**/*.js']
         dest   : "<%= dir.tmp %>"
       initCustomSinon:
         expand : true
@@ -67,15 +67,6 @@ module.exports = (grunt) ->
 
 
     wrap:
-      test:
-        expand: true
-        cwd: "<%= dir.tmp %>test/spec"
-        src: ["**"]
-        dest: "<%= dir.tmp %>test/spec"
-        options:
-          wrapper: [
-            "define(function() { return function() { var out ="
-            "return out;};});"]
       dist:
         expand: true
         cwd: "dist/"
@@ -120,7 +111,7 @@ module.exports = (grunt) ->
                     node.directories.push getFiles(name)
                   else
                     if (/\.coffee$/).test(file)
-                      node.files.push file.replace /\.coffee$/, ''
+                      node.files.push file.replace /\.coffee$/, '.js'
                 return node
 
               main_node = getFiles("#{grunt.config.get('dir.source')}test/spec")
@@ -163,7 +154,7 @@ module.exports = (grunt) ->
         cwd  : "<%= dir.source %>"
       coffeeFileModified:
         files: "**/*.coffee"
-        tasks: ["coffee", "amdwrap:compile", "wrap:test", "process", "mocha"]
+        tasks: ["coffee", "amdwrap:compile", "process", "mocha"]
         options:
           event: ['added', 'changed']
       coffeeFileDeleted:
@@ -179,6 +170,7 @@ module.exports = (grunt) ->
           out: "dist/plasticine.js"
           optimize: 'none'
           cjsTranslate: true
+          baseUrl: '<%= dir.tmp %>app'
           paths:
             requireLib: '../components/almond/almond'
           include: ['requireLib']
@@ -191,7 +183,7 @@ module.exports = (grunt) ->
           banner:
             """
             /*!
-             * plasticine JavaScript Library v0.0.0
+             * plasticine JavaScript Library <%= pkg.version %>
              * https://github.com/dfournier/plasticine
              *
              * Copyright 2014 David Fournier <fr.david.fournier@gmail.com>
@@ -225,7 +217,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-file-process'
   grunt.loadNpmTasks "grunt-contrib-concat"
   grunt.loadNpmTasks "grunt-contrib-requirejs"
-  grunt.loadNpmTasks "grunt-git-describe"
   grunt.loadNpmTasks "grunt-banner"
 
   grunt.event.on 'watch', (action, filepath, target) ->
@@ -245,18 +236,7 @@ module.exports = (grunt) ->
 
     if target is 'coffeeFileModified'
       coffee_files.push relative_path
-      # amdwrap task is only for files in app/ folder
-      # wrap task is only for files in test/spec folder
-      if (/^test/g).test relative_path
-        grunt.config("amdwrap.compile.src", [])
-        if (/^test\/spec/g).test relative_path
-          src = relative_compiled_path.replace /^test\/spec\//, ''
-          grunt.config("wrap.test.src", src)
-        else
-          grunt.config("wrap.test.src", [])
-      else
-        grunt.config("amdwrap.compile.src", relative_compiled_path)
-        grunt.config("wrap.test.src", [])
+      grunt.config("amdwrap.compile.src", relative_compiled_path)
 
       # recompile test/config.coffee if a new file is added in test/spec folder
       if action is 'added' and (/^test\/spec\//).test relative_path
@@ -270,12 +250,8 @@ module.exports = (grunt) ->
     grunt.config("process.testInit.files", process_files_conf)
 
 
-  grunt.registerTask 'setRevision', ->
-    grunt.event.once 'git-describe', -> grunt.option('gitRevision', rev)
-    grunt.task.run('git-describe')
-
   grunt.registerTask "initCustomSinon", ["concat:initCustomSinon"]
-  grunt.registerTask "compileTest", ["amdwrap:compile", "wrap:test", "process"]
+  grunt.registerTask "compileTest", ["amdwrap:compile", "process"]
 
   grunt.registerTask "default", ["test"]
   grunt.registerTask "compile", ["clean:tmp", "coffee", "copy", "initCustomSinon"]

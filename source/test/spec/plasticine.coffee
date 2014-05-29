@@ -1,4 +1,4 @@
-describe 'Default behavior', ->
+module.exports = -> describe 'Default behavior', ->
   content =
     message  : 'Hello'
     receiver : 'world'

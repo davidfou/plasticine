@@ -1,6 +1,6 @@
 crossroads = require 'crossroads'
 sinon      = require 'custom-sinon'
-MockBase   = require '../app/base'
+MockBase   = require './base'
 
 module.exports = Plasticine =
   passedRequests  : []
