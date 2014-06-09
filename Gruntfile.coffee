@@ -12,7 +12,6 @@ module.exports = (grunt) ->
       bower  : 'components/'
       tmp    : '.tmp/'
 
-
     # Task configuration.
     clean:
       tmp  : ["<%= dir.tmp %>"]
@@ -33,14 +32,6 @@ module.exports = (grunt) ->
           src: ['**']
           dest: "<%= dir.tmp %><%= dir.bower %>"
         ]
-      sinon:
-        files: [
-          expand: true
-          cwd: 'node_modules/sinon'
-          src: ['**']
-          dest: "<%= dir.tmp %><%= dir.bower %>sinon"
-        ]
-
 
     coffee:
       compile:
@@ -59,12 +50,6 @@ module.exports = (grunt) ->
         cwd    : "<%= dir.tmp %>"
         src    : ['app/**/*.js', 'test/spec/**/*.js']
         dest   : "<%= dir.tmp %>"
-      initCustomSinon:
-        expand : true
-        cwd    : "<%= dir.tmp %><%= dir.bower %>"
-        src    : "custom_sinon.js"
-        dest   : "<%= dir.tmp %><%= dir.bower %>"
-
 
     wrap:
       dist:
@@ -127,25 +112,20 @@ module.exports = (grunt) ->
           dest: "<%= dir.tmp %>test/"
         ]
 
-
-    concat:
-      initCustomSinon:
-        src  : [
-          'vendor/sinon/sinon_start.js'
-          'node_modules/sinon/lib/sinon.js'
-          'node_modules/sinon/lib/sinon/util/event.js'
-          'node_modules/sinon/lib/sinon/util/fake_xml_http_request.js'
-          'vendor/sinon/sinon_end.js'
-        ]
-        dest : "<%= dir.tmp %><%= dir.bower %>custom_sinon.js"
+    preprocess:
+      javascript:
+        options:
+          inline: true
+        src: ["<%= dir.tmp %>app/**/*.js"]
 
     mocha:
-      all: ["<%= dir.tmp %>test/index.html"]
-      options:
-        reporter : 'Progress'
-        run      : false
-        log: true
-        logErrors: true
+      all:
+        options:
+          urls     : ['http://localhost:8000/test']
+          reporter : 'Progress'
+          run      : false
+          log      : true
+          logErrors: true
 
     watch:
       options:
@@ -154,9 +134,14 @@ module.exports = (grunt) ->
         cwd  : "<%= dir.source %>"
       coffeeFileModified:
         files: "**/*.coffee"
+        tasks: ["coffee", "amdwrap:compile", "mocha"]
+        options:
+          event: ['changed']
+      coffeeFileAdded:
+        files: "**/*.coffee"
         tasks: ["coffee", "amdwrap:compile", "process", "mocha"]
         options:
-          event: ['added', 'changed']
+          event: ['added']
       coffeeFileDeleted:
         files: "**/*.coffee"
         tasks: ["clean:tmp", "coffee", "process", "mocha"]
@@ -215,17 +200,14 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-amd-wrap"
   grunt.loadNpmTasks "grunt-renaming-wrap"
   grunt.loadNpmTasks 'grunt-file-process'
-  grunt.loadNpmTasks "grunt-contrib-concat"
+  grunt.loadNpmTasks 'grunt-preprocess'
   grunt.loadNpmTasks "grunt-contrib-requirejs"
   grunt.loadNpmTasks "grunt-banner"
 
   grunt.event.on 'watch', (action, filepath, target) ->
     coffee_files = []
-    process_files_conf = grunt.config.get("process.testInit.files")
-    process_files_conf[0].src = ''
     compile_config = ->
       coffee_files.push 'test/config.coffee'
-      process_files_conf[0].src = 'config.js'
 
     coffee_task = 'coffee.compile'
     root_path = grunt.config.get("#{coffee_task}.cwd")
@@ -234,12 +216,12 @@ module.exports = (grunt) ->
     relative_compiled_path = relative_path.replace(/.coffee$/, ext)
     compiled_file = grunt.config.get('dir.tmp') + relative_compiled_path
 
-    if target is 'coffeeFileModified'
+    if target in ['coffeeFileModified', 'coffeeFileAdded']
       coffee_files.push relative_path
       grunt.config("amdwrap.compile.src", relative_compiled_path)
 
-      # recompile test/config.coffee if a new file is added in test/spec folder
-      if action is 'added' and (/^test\/spec\//).test relative_path
+      # recompile test/config.coffee if a file is added or deleted in test/spec folder
+      if action in ['deleted', 'added'] and (/^test\/spec\//).test relative_path
         compile_config()
 
     if target is 'coffeeFileDeleted'
@@ -247,17 +229,14 @@ module.exports = (grunt) ->
       compile_config() if (/^test\/spec\//).test relative_path
 
     grunt.config("#{coffee_task}.src", coffee_files)
-    grunt.config("process.testInit.files", process_files_conf)
 
 
-  grunt.registerTask "initCustomSinon", ["concat:initCustomSinon"]
   grunt.registerTask "compileTest", ["amdwrap:compile", "process"]
 
   grunt.registerTask "default", ["test"]
-  grunt.registerTask "compile", ["clean:tmp", "coffee", "copy", "initCustomSinon"]
+  grunt.registerTask "compile", ["clean:tmp", "coffee", "copy", "preprocess"]
   grunt.registerTask "build", ["clean:dist", "compile", "requirejs", "wrap:dist", "usebanner"]
 
-  grunt.registerTask "start", ["compile", "compileTest", "watch"]
-  grunt.registerTask "start:browser", ["connect:development", "start"]
+  grunt.registerTask "start", ["compile", "compileTest", "connect:development", "watch"]
 
   grunt.registerTask "test", ["compile", "compileTest", "mocha"]

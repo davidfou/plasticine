@@ -6,17 +6,14 @@ module.exports = -> describe 'Default behavior', ->
   it 'should define global variable', ->
     @plasticine.should.to.exist
     @plasticine.should.to.have.keys [
-      'passedRequests'
       'fakeRequests'
+      'realRequests'
       'pendingRequests'
-      'server'
       'addMock'
       'restore'
+      'logger'
     ]
 
-
-  it 'should instantiate a fake sinon server', ->
-    @plasticine.server.should.to.exist
 
   it 'should not intercept request', (done) ->
     $.ajax("info.json").done => done()
