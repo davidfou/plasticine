@@ -1,7 +1,7 @@
 {
   "name": "plasticine",
   "description": "A client side server mock",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "homepage": "https://github.com/dfournier/plasticine",
   "engines": {
     "node": "0.10.24"

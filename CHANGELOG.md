@@ -1,3 +1,16 @@
+## v0.1.0: Mon Jun 09 2014 23:22:11
+
+New features:
+
+* Support of PATCH method
+* Real server request can be modified with `afterGet`, `afterDelete`, `afterPost`, `afterPut` and `afterPatch` callbacks.
+
+Improvements:
+
+* Update all dependendices to the latest version.
+* Clean up the build process.
+
+
 ## v0.0.1: Thu Mar 06 2014 00:00:32
 
 Minor fixes:
