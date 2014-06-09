@@ -5,19 +5,27 @@ require.config
       name: 'lodash'
       location: '/components/lodash-amd/modern'
     }
+    {
+      name: 'sinon'
+      location: '/components/sinon/lib/sinon'
+      main: '../sinon'
+    }
   ]
   paths:
     'chai'         : '/components/chai/chai'
     'sinon-chai'   : '/components/sinon-chai/lib/sinon-chai'
-    'sinon'        : '/components/sinon/pkg/sinon-1.7.3'
     'jquery'       : '/components/jquery/dist/jquery'
     'plasticine'   : '/app/plasticine'
     'crossroads'   : '/components/crossroads.js/dist/crossroads'
     'signals'      : '/components/crossroads.js/dev/lib/signals'
-    'custom-sinon' : '/components/custom_sinon'
   shim:
     'sinon':
-      exports: "sinon"
+      deps: [
+        '/components/sinon/lib/sinon.js'
+        '/components/sinon/lib/sinon/util/event.js'
+        '/components/sinon/lib/sinon/util/fake_xml_http_request.js'
+      ]
+      exports: 'sinon'
 
 files = [
   'jquery'
@@ -61,25 +69,24 @@ require files, ->
   mocha.setup
     globals: ['should', 'sinon']
 
-  require [], ->
-    describe '', ->
-      before (done) ->
+  describe '', ->
+    before (done) ->
+      require ['sinon/util/event', 'sinon/util/fake_xml_http_request'], =>
         xhr = sinon.useFakeXMLHttpRequest()
-        xhr.onCreate = (request) =>
-          request.respondHelper = (status, data) ->
-            request.respond(
-              status
-              {"Content-Type": "application/json"}
-              JSON.stringify data)
-          @requests.push(request)
-
         require ['plasticine'], (plasticine) =>
+          xhr.onCreate = (request) =>
+            request.respondHelper = (status, data) ->
+              request.respond(
+                status
+                {"Content-Type": "application/json"}
+                JSON.stringify data)
+            @requests.push(request)
           @plasticine = plasticine
           done()
 
-      beforeEach ->
-        @requests = []
+    beforeEach ->
+      @requests = []
 
-      get_requires('/test/', main_node, true)
+    get_requires('/test/', main_node, true)
 
-    mocha.run()
+  mocha.run()

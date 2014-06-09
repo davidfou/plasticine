@@ -1,4 +1,4 @@
-module.exports = -> describe 'Mock behavior', ->
+module.exports = -> describe 'Fake request', ->
 
   mock_callback   = null
   done_callback   = null
@@ -23,7 +23,7 @@ module.exports = -> describe 'Mock behavior', ->
       message  : 'Hello'
       receiver : 'world'
 
-  describe 'basic functionalities ', ->
+  describe 'basic functionalities', ->
     mock = null
 
     before ->
@@ -32,13 +32,19 @@ module.exports = -> describe 'Mock behavior', ->
         get: ->
           mock_callback()
           status: 200
-          body: {}
+          body:
+            message  : 'Someone here?'
+            receiver : 'world'
 
     it 'should intercept with a static route on a GET', (done) ->
       ajax_call().always =>
         @requests.should.have.length 0
         fail_callback.should.not.have.been.called
         done_callback.should.have.been.calledOnce
+        response_text = done_callback.firstCall.args[0]
+        (JSON.parse response_text).should.be.deep.equal
+          message  : 'Someone here?'
+          receiver : 'world'
         mock_callback.should.have.been.calledOnce
         done()
 
@@ -48,6 +54,8 @@ module.exports = -> describe 'Mock behavior', ->
       ajax_call().always ->
         fail_callback.should.not.have.been.called
         done_callback.should.have.been.calledOnce
+        response_text = done_callback.firstCall.args[0]
+        (JSON.parse response_text).should.be.deep.equal content
         mock_callback.should.not.have.been.called
         done()
       @requests.should.have.length 1
@@ -126,4 +134,43 @@ module.exports = -> describe 'Mock behavior', ->
       .always ->
         patch_callback_stub.getCall(0).args.should.have.length 2
         patch_callback_stub.getCall(0).args[1].should.be.eql data
+        done()
+
+  describe 'with concurrent mocks', ->
+    mock1      = null
+    mock2      = null
+    mock1_spy  = sinon.spy()
+    mock2_spy  = sinon.spy()
+    logger_spy = sinon.spy()
+
+    before ->
+      mock1 = @plasticine.addMock
+        route  : '/info.json'
+        get    : ->
+          mock1_spy()
+          status : 200
+          body   : {}
+
+      mock2 = @plasticine.addMock
+        route  : '/info.json'
+        get    : ->
+          mock2_spy()
+          status : 200
+          body   : {}
+
+    after ->
+      mock1.dispose()
+      mock2.dispose()
+
+    it 'should warn if 2 mocks try to fake the same route', (done) ->
+      @plasticine.logger.warn.add logger_spy
+      $.ajax
+        type : 'GET'
+        url  : '/info.json'
+      .always (data, event, xhr) ->
+        mock1_spy.should.have.been.calledOnce
+        mock2_spy.should.have.not.been.called
+        logger_spy.should.have.been.calledOnce
+        logger_spy.firstCall.args[0].should.equal 'ALREADY_FAKED'
+        logger_spy.firstCall.args[1].should.equal mock2
         done()
