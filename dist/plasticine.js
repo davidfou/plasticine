@@ -1,12 +1,12 @@
 /*!
- * plasticine JavaScript Library 0.1.0
+ * plasticine JavaScript Library 0.1.1
  * https://github.com/dfournier/plasticine
  *
  * Copyright 2014 David Fournier <fr.david.fournier@gmail.com>
  * Released under the MIT license
  * https://github.com/dfournier/plasticine/blob/master/LICENSE-MIT
  *
- * Date: Mon Jun 09 2014 23:22:11
+ * Date: Tue Jun 10 2014 11:53:22
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -3949,7 +3949,7 @@ module.exports = Plasticine = {
       params = {};
     }
     model = new Mock();
-    available_params = ['route', 'get', 'put', 'post', 'patch', 'delete', 'afterGet'];
+    available_params = ['route', 'get', 'put', 'post', 'patch', 'delete', 'afterGet', 'afterPut', 'afterPost', 'afterPatch', 'afterDelete'];
     for (_i = 0, _len = available_params.length; _i < _len; _i++) {
       key = available_params[_i];
       model[key] = params[key];

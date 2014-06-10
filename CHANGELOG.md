@@ -1,3 +1,10 @@
+## v0.1.1: Tue Jun 10 2014 11:53:22
+
+Major fixes:
+
+* Allow `afterDelete`, `afterPost`, `afterPut` and `afterPatch` keys as parameters in the addMock method.
+
+
 ## v0.1.0: Mon Jun 09 2014 23:22:11
 
 New features:
