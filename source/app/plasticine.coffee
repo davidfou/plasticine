@@ -100,6 +100,10 @@ module.exports = Plasticine =
       'patch'
       'delete'
       'afterGet'
+      'afterPut'
+      'afterPost'
+      'afterPatch'
+      'afterDelete'
     ]
     model[key] = params[key] for key in available_params
     model.setUp()
