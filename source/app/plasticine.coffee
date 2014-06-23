@@ -34,6 +34,11 @@ initialize = ->
       responseReady     : new Signal()
       fakeResponse      : null
       responseModifiers : []
+      processBody: ->
+        unless @isBodyProcessed
+          @isBodyProcessed = true
+          @response.body = JSON.parse @response.body
+      isBodyProcessed   : false
 
   Request.addFilter (method, url) ->
     xhr = Plasticine.pendingRequests.pop()
@@ -46,10 +51,11 @@ initialize = ->
       Plasticine.fakeRequests.push xhr
 
       xhr.responseReady.add ->
+        xhr.response.body = JSON.stringify(xhr.response.body) if xhr.isBodyProcessed
         xhr.request.respond(
           xhr.response.status
           xhr.response.headers
-          JSON.stringify xhr.response.body)
+          xhr.response.body)
 
       unless xhr.fakeResponse?
         protectFromFaking()
@@ -59,7 +65,7 @@ initialize = ->
 
         real_request.open method, url, true
         xhr.request.onSend = ->
-          for key, value of xhr.requestHeaders
+          for key, value of xhr.request.requestHeaders
             real_request.setRequestHeader key, value
           real_request.send xhr.request.requestBody || ''
 
@@ -68,7 +74,7 @@ initialize = ->
             xhr.response =
               status  : real_request.status
               headers : real_request.requestHeaders
-              body    : JSON.parse real_request.responseText
+              body    : real_request.responseText
             xhr.responseReady.dispatch()
         real_request.addEventListener "readystatechange", ready_state_change, false
         ready_state_change()

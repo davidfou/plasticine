@@ -63,69 +63,23 @@ module.exports = (grunt) ->
             (function (root, factory) {
               if (typeof define === 'function' && define.amd) {
                 // AMD. Register as an anonymous module.
-                define(['b'], factory);
+                define(['plasticine'], factory);
               } else {
                 // Browser globals
-                root.Plasticine = factory(root.b);
+                root.Plasticine = factory(root);
               }
-            }(this, function (b) {
+            }(this, function (global) {
             """
             """
               return require('plasticine');
             }));
             """]
 
-    process:
-      testInit:
-        options:
-          base64: false
-          processors: [
-            pattern: '// main_node_var_here'
-            setup: (grunt) ->
-              fs = require 'fs'
-              getFiles = (dir) ->
-
-                node =
-                  name: dir.split('/').pop()
-                  files: []
-                  directories: []
-                files = fs.readdirSync(dir)
-                for file in files
-                  name = dir + '/' + file
-                  if fs.statSync(name).isDirectory()
-                    node.directories.push getFiles(name)
-                  else
-                    if (/\.coffee$/).test(file)
-                      node.files.push file.replace /\.coffee$/, '.js'
-                return node
-
-              main_node = getFiles("#{grunt.config.get('dir.source')}test/spec")
-              return main_node: main_node
-
-            handler: (context) ->
-              return JSON.stringify context.main_node
-          ]
-        files: [
-          expand: true
-          cwd: "<%= dir.tmp %>test/"
-          src: "config.js"
-          dest: "<%= dir.tmp %>test/"
-        ]
-
     preprocess:
       javascript:
         options:
           inline: true
         src: ["<%= dir.tmp %>app/**/*.js"]
-
-    mocha:
-      all:
-        options:
-          urls     : ['http://localhost:8000/test']
-          reporter : 'Progress'
-          run      : false
-          log      : true
-          logErrors: true
 
     watch:
       options:
@@ -139,12 +93,12 @@ module.exports = (grunt) ->
           event: ['changed']
       coffeeFileAdded:
         files: "**/*.coffee"
-        tasks: ["coffee", "amdwrap:compile", "process", "mocha"]
+        tasks: ["coffee", "amdwrap:compile", "mocha"]
         options:
           event: ['added']
       coffeeFileDeleted:
         files: "**/*.coffee"
-        tasks: ["clean:tmp", "coffee", "process", "mocha"]
+        tasks: ["clean:tmp", "coffee", "mocha"]
         options:
           event: ['deleted']
 
@@ -181,16 +135,8 @@ module.exports = (grunt) ->
         files:
           src: "dist/plasticine.js"
 
-    "git-describe":
-      dist: {}
 
-    connect:
-      development:
-        options:
-          open: 'http://0.0.0.0:8000/test'
-          base: ["./", "<%= dir.tmp %>"]
-
-
+  grunt.task.loadTasks 'grunt_tasks'
   grunt.loadNpmTasks "grunt-contrib-clean"
   grunt.loadNpmTasks "grunt-mocha"
   grunt.loadNpmTasks "grunt-contrib-watch"
@@ -199,7 +145,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-coffee"
   grunt.loadNpmTasks "grunt-amd-wrap"
   grunt.loadNpmTasks "grunt-renaming-wrap"
-  grunt.loadNpmTasks 'grunt-file-process'
   grunt.loadNpmTasks 'grunt-preprocess'
   grunt.loadNpmTasks "grunt-contrib-requirejs"
   grunt.loadNpmTasks "grunt-banner"
@@ -231,7 +176,7 @@ module.exports = (grunt) ->
     grunt.config("#{coffee_task}.src", coffee_files)
 
 
-  grunt.registerTask "compileTest", ["amdwrap:compile", "process"]
+  grunt.registerTask "compileTest", ["amdwrap:compile"]
 
   grunt.registerTask "default", ["test"]
   grunt.registerTask "compile", ["clean:tmp", "coffee", "copy", "preprocess"]
