@@ -34,6 +34,7 @@ fakeRequest = (method) ->
 
       xhr.fakeResponse.response = @[method].apply(@, new_arguments)
       xhr.fakeResponse.response.headers = MockBase.header
+      xhr.isBodyProcessed = true
       xhr.response = clone xhr.fakeResponse.response, true
       xhr.responseReady.dispatch()
 
@@ -42,6 +43,7 @@ fakeRequest = (method) ->
 modifyRequest = (method) ->
   defineRouterCallback.call this,  method, (xhr, route_params) =>
     xhr.responseReady.add =>
+      xhr.processBody()
       new_response = xhr.response
       modifier =
         source : clone(xhr.response, true)
