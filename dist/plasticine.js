@@ -1,22 +1,22 @@
 /*!
- * plasticine JavaScript Library 0.1.1
+ * plasticine JavaScript Library 0.1.2
  * https://github.com/dfournier/plasticine
  *
  * Copyright 2014 David Fournier <fr.david.fournier@gmail.com>
  * Released under the MIT license
  * https://github.com/dfournier/plasticine/blob/master/LICENSE-MIT
  *
- * Date: Tue Jun 10 2014 11:53:22
+ * Date: Mon Jun 23 2014 23:29:58
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['b'], factory);
+    define(['plasticine'], factory);
   } else {
     // Browser globals
-    root.Plasticine = factory(root.b);
+    root.Plasticine = factory(root);
   }
-}(this, function (b) {
+}(this, function (global) {
 /**
  * @license almond 0.2.9 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
@@ -3726,6 +3726,7 @@ fakeRequest = function(method) {
         }
         xhr.fakeResponse.response = _this[method].apply(_this, new_arguments);
         xhr.fakeResponse.response.headers = MockBase.header;
+        xhr.isBodyProcessed = true;
         xhr.response = clone(xhr.fakeResponse.response, true);
         return xhr.responseReady.dispatch();
       };
@@ -3739,6 +3740,7 @@ modifyRequest = function(method) {
     return function(xhr, route_params) {
       return xhr.responseReady.add(function() {
         var modifier, new_response;
+        xhr.processBody();
         new_response = xhr.response;
         modifier = {
           source: clone(xhr.response, true),
@@ -3879,7 +3881,14 @@ initialize = function() {
       protectFromFaking: getProtectFromFakingValue(),
       responseReady: new Signal(),
       fakeResponse: null,
-      responseModifiers: []
+      responseModifiers: [],
+      processBody: function() {
+        if (!this.isBodyProcessed) {
+          this.isBodyProcessed = true;
+          return this.response.body = JSON.parse(this.response.body);
+        }
+      },
+      isBodyProcessed: false
     });
   };
   return Request.addFilter(function(method, url) {
@@ -3895,7 +3904,10 @@ initialize = function() {
       Router.parse("/" + method + (url.split('?')[0]), [xhr]);
       Plasticine.fakeRequests.push(xhr);
       xhr.responseReady.add(function() {
-        return xhr.request.respond(xhr.response.status, xhr.response.headers, JSON.stringify(xhr.response.body));
+        if (xhr.isBodyProcessed) {
+          xhr.response.body = JSON.stringify(xhr.response.body);
+        }
+        return xhr.request.respond(xhr.response.status, xhr.response.headers, xhr.response.body);
       });
       if (xhr.fakeResponse == null) {
         protectFromFaking();
@@ -3906,7 +3918,7 @@ initialize = function() {
         real_request.open(method, url, true);
         xhr.request.onSend = function() {
           var key, value, _ref;
-          _ref = xhr.requestHeaders;
+          _ref = xhr.request.requestHeaders;
           for (key in _ref) {
             value = _ref[key];
             real_request.setRequestHeader(key, value);
@@ -3918,7 +3930,7 @@ initialize = function() {
             xhr.response = {
               status: real_request.status,
               headers: real_request.requestHeaders,
-              body: JSON.parse(real_request.responseText)
+              body: real_request.responseText
             };
             return xhr.responseReady.dispatch();
           }
