@@ -1,5 +1,5 @@
-clone = require 'lodash/objects/clone'
-module.exports = -> describe 'Modify request', ->
+clone = require "lodash/objects/clone"
+module.exports = -> describe "Modify request", ->
 
   done_callback = null
   fail_callback = null

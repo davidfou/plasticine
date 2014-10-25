@@ -1,4 +1,4 @@
-sinon = require './custom_sinon'
+sinon = require "./custom_sinon"
 
 module.exports =
   isUnset: (request) ->
