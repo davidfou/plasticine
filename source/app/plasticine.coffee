@@ -1,10 +1,10 @@
-Router        = require 'crossroads'
-Signal        = require 'signals'
-Mock          = require './mock'
-Logger        = require './logger'
-requestStatus = require './request_status'
+Router        = require "crossroads"
+Signal        = require "signals"
+Mock          = require "./mock"
+Logger        = require "./logger"
+requestStatus = require "./request_status"
 
-sinon = require './custom_sinon'
+sinon = require "./custom_sinon"
 defer = require "lodash/functions/defer"
 
 # setup Router

@@ -1,4 +1,4 @@
-Signal = require 'signals'
+Signal = require "signals"
 
 module.exports =
   debug : new Signal()

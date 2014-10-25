@@ -3,27 +3,27 @@ require.config
   packages: [
     {
       name: 'lodash'
-      location: '/components/lodash-amd/modern'
+      location: '/vendor/lodash-amd/modern'
     }
     {
       name: 'sinon'
-      location: '/components/sinon/lib/sinon'
+      location: '/vendor/sinon/lib/sinon'
       main: '../sinon'
     }
   ]
   paths:
-    'chai'         : '/components/chai/chai'
-    'sinon-chai'   : '/components/sinon-chai/lib/sinon-chai'
-    'jquery'       : '/components/jquery/dist/jquery'
+    'chai'         : '/vendor/chai/chai'
+    'sinon-chai'   : '/vendor/sinon-chai/lib/sinon-chai'
+    'jquery'       : '/vendor/jquery/dist/jquery'
     'plasticine'   : '/app/plasticine'
-    'crossroads'   : '/components/crossroads.js/dist/crossroads'
-    'signals'      : '/components/crossroads.js/dev/lib/signals'
+    'crossroads'   : '/vendor/crossroads.js/dist/crossroads'
+    'signals'      : '/vendor/crossroads.js/dev/lib/signals'
   shim:
     'sinon':
       deps: [
-        '/components/sinon/lib/sinon.js'
-        '/components/sinon/lib/sinon/util/event.js'
-        '/components/sinon/lib/sinon/util/fake_xml_http_request.js'
+        '/vendor/sinon/lib/sinon.js'
+        '/vendor/sinon/lib/sinon/util/event.js'
+        '/vendor/sinon/lib/sinon/util/fake_xml_http_request.js'
       ]
       exports: 'sinon'
 
@@ -35,8 +35,7 @@ files = [
 
 
 require ['jquery'], ($) ->
-  $.ajax({url: 'spec/list.json', method: 'GET'}).done (data) ->
-    main_node = JSON.parse(data)
+  $.getJSON('/list.json').done (main_node) ->
     get_files = (path, node) ->
       out = []
       new_path = path + node.name + '/'
