@@ -1,11 +1,11 @@
 require.config
   name: 'plasticine'
   paths:
-    'crossroads'       : '../components/crossroads.js/dist/crossroads'
-    'signals'          : '../components/crossroads.js/dev/lib/signals'
+    'crossroads'       : '../vendor/crossroads.js/dist/crossroads'
+    'signals'          : '../vendor/crossroads.js/dev/lib/signals'
   packages: [
     {
       name: 'lodash'
-      location: '../components/lodash-amd/modern'
+      location: '../vendor/lodash-amd/modern'
     }
   ]

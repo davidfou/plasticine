@@ -86,6 +86,11 @@ All dependencies are include in the library:
   * [Mocha](http://visionmedia.github.io/mocha/): test framework
   * [Sinon.js](http://sinonjs.org/): to create fake server
 
+## Contribute
+
+To develop, `broccoli-cli`, `bower` and a decent version of `node` are needed.
+Then run `npm test` and open `http://localhost:4200/test/`.
+
 ## Roadmap
 
 * Configure custom delay
