@@ -10,23 +10,10 @@ var replace           = require('broccoli-replace');
 
 var source = coffee('source', {bare: true});
 var vendor = pick('vendor', {srcDir: '/', destDir: '/vendor'});
+vendor = mergeTrees([vendor, pick('node_modules/sinon', {srcDir: '/', destDir: '/vendor/sinon'})]);
 
 var main_files = pick(source, {srcDir: '/', destDir: '/', files: ['**/main.js']});
 var module_files = pick(source, {srcDir: '/', destDir: '/', files: ['**/!(main).*']});
-
-var sinon_path = 'vendor/sinon/lib/sinon/util/';
-module_files = replace(module_files, {
-  files: ['**/*'],
-  patterns: [
-    {
-      match: 'includeSinonEvent',
-      replacement: fs.readFileSync(sinon_path + 'event.js', 'utf8')
-    }, {
-      match: 'includeSinonFakeXmlHttpRequest',
-      replacement: fs.readFileSync(sinon_path + 'fake_xml_http_request.js', 'utf8')
-    }
-  ]
-});
 
 module_files = wrap(module_files,
   {wrapper: ["define(function(require, exports, module) {\n", "\n});"]}

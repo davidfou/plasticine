@@ -15,9 +15,9 @@ module.exports = -> describe 'Fake request', ->
       .fail(fail_callback)
 
   beforeEach ->
-    mock_callback = sinon.spy()
-    done_callback = sinon.spy()
-    fail_callback = sinon.spy()
+    mock_callback = @sinon.spy()
+    done_callback = @sinon.spy()
+    fail_callback = @sinon.spy()
 
     content =
       message  : 'Hello'
@@ -63,13 +63,18 @@ module.exports = -> describe 'Fake request', ->
 
   describe 'arguments passed to callbacks', ->
     mock                 = null
-    get_callback_stub    = sinon.stub()
-    delete_callback_stub = sinon.stub()
-    post_callback_stub   = sinon.stub()
-    put_callback_stub    = sinon.stub()
-    patch_callback_stub  = sinon.stub()
+    get_callback_stub    = null
+    delete_callback_stub = null
+    post_callback_stub   = null
+    put_callback_stub    = null
+    patch_callback_stub  = null
 
     before ->
+      get_callback_stub    = @sinon.stub()
+      delete_callback_stub = @sinon.stub()
+      post_callback_stub   = @sinon.stub()
+      put_callback_stub    = @sinon.stub()
+      patch_callback_stub  = @sinon.stub()
       get_callback_stub.returns status: 200, body: {}
       delete_callback_stub.returns status: 200, body: {}
       post_callback_stub.returns status: 200, body: {}
@@ -139,11 +144,15 @@ module.exports = -> describe 'Fake request', ->
   describe 'with concurrent mocks', ->
     mock1      = null
     mock2      = null
-    mock1_spy  = sinon.spy()
-    mock2_spy  = sinon.spy()
-    logger_spy = sinon.spy()
+    mock1_spy  = null
+    mock2_spy  = null
+    logger_spy = null
 
     before ->
+      mock1_spy  = @sinon.spy()
+      mock2_spy  = @sinon.spy()
+      logger_spy = @sinon.spy()
+
       mock1 = @plasticine.addMock
         route  : '/info.json'
         get    : ->

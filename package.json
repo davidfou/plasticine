@@ -25,17 +25,19 @@
       "url": "https://github.com/dfournier/plasticine/blob/master/LICENSE-MIT"
     }
   ],
+  "dependencies": {
+    "sinon"                    : "1.12.1"
+  },
   "devDependencies": {
-    "broccoli"                 : "0.12.3",
+    "broccoli"                 : "0.13.3",
     "broccoli-writer"          : "0.1.1",
-    "broccoli-coffee"          : "0.1.1",
-    "broccoli-merge-trees"     : "0.1.4",
-    "broccoli-static-compiler" : "0.1.4",
-    "broccoli-requirejs"       : "dfournier/broccoli-requirejs#support_main_config_file_option",
-    "broccoli-replace"         : "0.1.7",
+    "broccoli-coffee"          : "0.3.0",
+    "broccoli-merge-trees"     : "0.2.1",
+    "broccoli-static-compiler" : "0.2.1",
+    "broccoli-requirejs"       : "0.1.0",
+    "broccoli-replace"         : "0.2.0",
     "broccoli-wrap"            : "0.0.2",
     "broccoli-env"             : "0.0.1",
-    "sinon"                    : "1.10.2",
-    "moment"                   : "2.8.3"
+    "moment"                   : "2.8.4"
   }
 }
