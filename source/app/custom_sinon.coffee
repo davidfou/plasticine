@@ -1,12 +1,13 @@
-root = this
-previous_sinon = root.sinon
-sinon =
-  noConflict: ->
-    root.sinon = previous_sinon
-    return this
-  extend: require "lodash/objects/assign"
+fakeXmlHttpRequest = require 'sinon/util/fake_xml_http_request'
+core               = require 'sinon/util/core'
+extend             = require 'sinon/extend'
+event              = require 'sinon/util/event'
+logError           = require 'sinon/log_error'
 
-`@@includeSinonEvent`
-`@@includeSinonFakeXmlHttpRequest`
+sinon = {}
+for lib in [fakeXmlHttpRequest, core, extend, event, logError]
+  for key, value of lib
+    sinon[key] = value
+console.log sinon
 
-module.exports = sinon.noConflict()
+module.exports = sinon

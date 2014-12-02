@@ -7,5 +7,8 @@ require.config
     {
       name: 'lodash'
       location: '../vendor/lodash-amd/modern'
+    }, {
+      name: 'sinon'
+      location: '../vendor/sinon/lib/sinon'
     }
   ]

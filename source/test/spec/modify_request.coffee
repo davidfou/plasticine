@@ -15,9 +15,9 @@ module.exports = -> describe "Modify request", ->
       .fail(fail_callback)
 
   beforeEach ->
-    mock_callback = sinon.spy()
-    done_callback = sinon.spy()
-    fail_callback = sinon.spy()
+    mock_callback = @sinon.spy()
+    done_callback = @sinon.spy()
+    fail_callback = @sinon.spy()
 
     content =
       message  : 'Hello'
@@ -39,7 +39,7 @@ module.exports = -> describe "Modify request", ->
       mock.dispose()
 
     beforeEach ->
-      mock_callback = sinon.spy()
+      mock_callback = @sinon.spy()
 
     it 'should not intercept request and modify the response', (done) ->
       ajax_call().always =>
@@ -84,8 +84,8 @@ module.exports = -> describe "Modify request", ->
       mock2.dispose()
 
     beforeEach ->
-      mock_callback1 = sinon.spy()
-      mock_callback2 = sinon.spy()
+      mock_callback1 = @sinon.spy()
+      mock_callback2 = @sinon.spy()
 
     it 'should apply mock consecutively', (done) ->
       ajax_call().always =>

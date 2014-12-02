@@ -4,11 +4,9 @@ require.config
     {
       name: 'lodash'
       location: '/vendor/lodash-amd/modern'
-    }
-    {
+    }, {
       name: 'sinon'
       location: '/vendor/sinon/lib/sinon'
-      main: '../sinon'
     }
   ]
   paths:
@@ -18,19 +16,12 @@ require.config
     'plasticine'   : '/app/plasticine'
     'crossroads'   : '/vendor/crossroads.js/dist/crossroads'
     'signals'      : '/vendor/crossroads.js/dev/lib/signals'
-  shim:
-    'sinon':
-      deps: [
-        '/vendor/sinon/lib/sinon.js'
-        '/vendor/sinon/lib/sinon/util/event.js'
-        '/vendor/sinon/lib/sinon/util/fake_xml_http_request.js'
-      ]
-      exports: 'sinon'
+    'sinonBuild'   : '/vendor/sinon/pkg/sinon'
 
 files = [
+  'sinonBuild'
   'chai'
   'sinon-chai'
-  'sinon'
 ]
 
 
@@ -58,7 +49,7 @@ require ['jquery'], ($) ->
           get_requires(new_path, directory)
 
 
-    require files, ->
+    require files, (sinon) ->
       chai = require("chai")
       sinonChai = require("sinon-chai")
 
@@ -66,22 +57,22 @@ require ['jquery'], ($) ->
 
       chai.use(sinonChai);
       mocha.setup
-        globals: ['should', 'sinon']
+        globals: ['should', ]
 
       describe '', ->
         before (done) ->
-          require ['sinon/util/event', 'sinon/util/fake_xml_http_request'], =>
-            xhr = sinon.useFakeXMLHttpRequest()
-            require ['plasticine'], (plasticine) =>
-              xhr.onCreate = (request) =>
-                request.respondHelper = (status, data) ->
-                  request.respond(
-                    status
-                    {"Content-Type": "application/json"}
-                    JSON.stringify data)
-                @requests.push(request)
-              @plasticine = plasticine
-              done()
+          @sinon = sinon
+          xhr = @sinon.useFakeXMLHttpRequest()
+          require ['plasticine'], (plasticine) =>
+            xhr.onCreate = (request) =>
+              request.respondHelper = (status, data) ->
+                request.respond(
+                  status
+                  {"Content-Type": "application/json"}
+                  JSON.stringify data)
+              @requests.push(request)
+            @plasticine = plasticine
+            done()
 
         beforeEach ->
           @requests = []

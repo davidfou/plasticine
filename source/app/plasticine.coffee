@@ -5,7 +5,6 @@ Logger        = require "./logger"
 requestStatus = require "./request_status"
 
 sinon = require "./custom_sinon"
-defer = require "lodash/functions/defer"
 
 # setup Router
 Router.normalizeFn = Router.NORM_AS_OBJECT;

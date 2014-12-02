@@ -1,5 +1,5 @@
 module.exports = -> describe 'Default behavior', ->
-  it 'should define global variable', ->
+  it 'should expose an API', ->
     @plasticine.should.to.exist
     @plasticine.should.to.have.keys [
       'fakeRequests'
