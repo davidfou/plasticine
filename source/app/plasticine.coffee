@@ -46,7 +46,10 @@ initialize = ->
       Plasticine.realRequests.push xhr
       return true
     else
-      url = '/' + url unless url.charAt(0) is '/'
+      urlHelper = document.createElement('a')
+      urlHelper.href = url
+      url = urlHelper.pathname
+
       Router.parse "/#{method}#{url.split('?')[0]}", [xhr]
       Plasticine.fakeRequests.push xhr
 
@@ -63,7 +66,7 @@ initialize = ->
         xhr.realResponse =
           request : real_request
 
-        real_request.open method, url, true
+        real_request.open method, urlHelper.origin + url, true
         xhr.request.onSend = ->
           for key, value of xhr.request.requestHeaders
             real_request.setRequestHeader key, value
