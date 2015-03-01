@@ -1,3 +1,10 @@
+## v0.1.3: Sun Mar 01 2015 20:53:29
+
+Major fixes:
+
+* Request urls send to the server were rewrited
+
+
 ## v0.1.2: Mon Jun 23 2014 23:29:58
 
 Major fixes:

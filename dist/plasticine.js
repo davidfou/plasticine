@@ -1,12 +1,12 @@
 /*!
- * plasticine JavaScript Library 0.1.2
+ * plasticine JavaScript Library 0.1.3
  * https://github.com/dfournier/plasticine
  *
  * Copyright 2014 David Fournier <fr.david.fournier@gmail.com>
  * Released under the MIT license
  * https://github.com/dfournier/plasticine/blob/master/LICENSE-MIT
  *
- * Date: Mon Jun 23 2014 23:29:58
+ * Date: Sun Mar 01 2015 20:53:29
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
