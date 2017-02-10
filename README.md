@@ -83,7 +83,7 @@ All dependencies are include in the library:
 * Development dependencies
   * [Chai](http://chaijs.com/): assertion library
   * [jQuery](http://jquery.com/): to send requests
-  * [Mocha](http://visionmedia.github.io/mocha/): test framework
+  * [Mocha](http://mochajs.org/): test framework
   * [Sinon.js](http://sinonjs.org/): to create fake server
 
 ## Roadmap
